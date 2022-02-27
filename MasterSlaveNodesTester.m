@@ -14,7 +14,7 @@ classdef MasterSlaveNodesTester < Tester
         
         function obj = MasterSlaveNodesTester(D0)
             obj.data = D0;
-            obj.testName = 'MasterSlaveNodes';
+            obj.testName = 'MasterSlaveNodesComputer';
             obj.loadCorrectValues();
             obj.obtainCalculatedData();
             obj.verify();
@@ -30,7 +30,7 @@ classdef MasterSlaveNodesTester < Tester
         end
         
         function obtainCalculatedData(obj)
-            solution = computeMasterSlaveNodes(obj.data.coord,obj.data.div);
+            solution = computeMasterSlaveNodes(obj.data.coord,obj.data.div,obj.data.c);
             obj.calcValues(1).Matrix = solution;
         end
     

@@ -1,53 +1,48 @@
-function master_slave = computeMasterSlaveNodes(coord,div) 
-    % Posiciones básicas
-    xmax = max(coord(:,1));
-    xmin = min(coord(:,1));
-    ymax = max(coord(:,2));
-    ymin = min(coord(:,2));
-    ymed = (ymax+ymin)/2;
+function master_slave = computeMasterSlaveNodes(coord,div,c)
+    % EN LUGAR DE ENTRAR TODAS LAS COORDENADAS ES RECOMENDABLE ENTRAR LAS
+    % COORDENADAS DEL BOUNDARY (ÚNICAS ÚTILES)
+    [vert,ymax,ymin,xmax,xmin,xmed] = computeOrderedVertices(coord,c);
+    
+    function [vert,ymax,ymin,xmax,xmin,xmed] = computeOrderedVertices(coord,c)
+        % function: find essential coordinates
+        xmax = max(coord(:,1));
+        xmin = min(coord(:,1));
+        xmed = (xmax-xmin)/2;
+        ymax = max(coord(:,2));
+        ymin = min(coord(:,2));
+        ymed = (ymax-ymin)/2;
+        % CONDENSAR ESTAS COORDENADAS EN UN STRUCT
         
-        % Posiciones de los 6 puntos básicos
-        min1 = 1e5;
-        max2 = 0;
-        min5 = 1e5;
-        max6 = 0;
-        for i = 1:size(coord,1)
-            if coord(i,2) == ymax
-                if coord(i,1) < min1
-                    min1 = coord(i,1);
-                end
-                if coord(i,1) > max2
-                    max2 = coord(i,1);
-                end
-            elseif coord(i,2) == ymin %Encontrar min5 y max5 es indiferente ya que son iguales que min1 y max2 respectivamente
-                if coord(i,1) < min5
-                    min5 = coord(i,1);
-                end
-                if coord(i,1) > max6
-                    max6 = coord(i,1);
-                end
-            end
-        end
-        pos(1,:) = [min1,ymax];
-        pos(2,:) = [max2,ymax];
-        pos(3,:) = [xmin,ymed];
-        pos(4,:) = [xmax,ymed];
-        pos(5,:) = [min5,ymin];
-        pos(6,:) = [max6,ymin];
+        % function: assign coordinated to ordered vertices
+        % POSICIONES ORDENADAS DE FORMA ANTIHORARIA
+%         vert(1,:) = [xmed-c/2,ymax];
+%         vert(2,:) = [xmin,ymed];
+%         vert(3,:) = [xmed-c/2,ymin];
+%         vert(4,:) = [xmed+c/2,ymin];
+%         vert(5,:) = [xmax,ymed];
+%         vert(6,:) = [xmed+c/2,ymax];
+ 
+        vert(1,:) = [xmed-c/2,ymax];
+        vert(2,:) = [xmed+c/2,ymax];
+        vert(3,:) = [xmin,ymed];
+        vert(4,:) = [xmax,ymed];
+        vert(5,:) = [xmed-c/2,ymin];
+        vert(6,:) = [xmed+c/2,ymin];
+    end
         
         % Parametrización de rectas
         % Primera recta
-        m1 = (pos(3,2)-pos(1,2))/(pos(3,1)-pos(1,1));
-        n1 = pos(1,2)-m1*pos(1,1);
+        m1 = (vert(3,2)-vert(1,2))/(vert(3,1)-vert(1,1));
+        n1 = vert(1,2)-m1*vert(1,1);
         % Segunda recta
-        m2 = (pos(6,2)-pos(4,2))/(pos(6,1)-pos(4,1));
-        n2 = pos(4,2)-m2*pos(4,1);
+        m2 = (vert(6,2)-vert(4,2))/(vert(6,1)-vert(4,1));
+        n2 = vert(4,2)-m2*vert(4,1);
         % Tercera recta
-        m3 = (pos(4,2)-pos(2,2))/(pos(4,1)-pos(2,1));
-        n3 = pos(2,2)-m3*pos(2,1);
+        m3 = (vert(4,2)-vert(2,2))/(vert(4,1)-vert(2,1));
+        n3 = vert(2,2)-m3*vert(2,1);
         % Cuarta recta
-        m4 = (pos(5,2)-pos(3,2))/(pos(5,1)-pos(3,1));
-        n4 = pos(3,2)-m4*pos(3,1);
+        m4 = (vert(5,2)-vert(3,2))/(vert(5,1)-vert(3,1));
+        n4 = vert(3,2)-m4*vert(3,1);
         
         % Hallar los master-slave nodes
         master_slave1 = zeros(div-1,2);
@@ -65,13 +60,13 @@ function master_slave = computeMasterSlaveNodes(coord,div)
         for i = 1:size(coord,1)
             % Tramo superior e inferior
             if coord(i,2) == ymax
-                if (coord(i,1) ~= min1) && (coord(i,1) ~= max2)
+                if (coord(i,1) ~= xmed-c/2) && (coord(i,1) ~= xmed+c/2)
                     master_slave1(p_up,1) = master_slave1(p_up,1)+i;
                     p_up = p_up+1; 
                 end
             end
             if coord(i,2) == ymin
-                if (coord(i,1) ~= min5) && (coord(i,1) ~= max6)
+                if (coord(i,1) ~= xmed-c/2) && (coord(i,1) ~= xmed+c/2)
                     master_slave1(p_dwn,2) = master_slave1(p_dwn,2)+i;
                     p_dwn = p_dwn+1;
                 end
