@@ -12,8 +12,8 @@ classdef MasterSlaveNodesTester < Tester
     
     methods (Access = public)
         
-        function obj = MasterSlaveNodesTester(D0)
-            obj.data = D0;
+        function obj = MasterSlaveNodesTester(cParams)
+            obj.data = cParams;
             obj.testName = 'MasterSlaveNodesComputer';
             obj.loadCorrectValues();
             obj.obtainCalculatedData();

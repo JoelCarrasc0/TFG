@@ -1,12 +1,12 @@
 function masterSlave = computeMasterSlaveNodes(coord,div,c)
 % EN LUGAR DE ENTRAR TODAS LAS COORDENADAS ES RECOMENDABLE ENTRAR LAS
 % COORDENADAS DEL BOUNDARY (ÚNICAS ÚTILES)
-vertCoord = computeOrderedVertices(coord,c); 
-[normalVec,interiorNodes] = computeBoundaryMeshes(vertCoord,coord,div);
+vert = computeOrderedVertices(coord,c); 
+[normalVec,interiorNodes] = computeBoundaryMeshes(vert,coord,div);
 pairs = computePairOfMeshes(normalVec);
 masterSlave = computeMasterAndSlaves(interiorNodes,pairs);
+plotVertices(vert,coord);
 plotMasterSlave(masterSlave,coord)
-%plotVertices(vert,coord);
 end
 
 function plotVertices(vert,coord)
@@ -38,16 +38,16 @@ end
 function vert = computeOrderedVertices(coord,c)
 % function: find essential coordinates
 [xmax] = max(coord(:,1));
-%idx = obtainAllIndeces(coord(:,1),xmax);
+idx = obtainAllIndeces(coord(:,1),xmax);
 
 xmin = min(coord(:,1));
-%idx = obtainAllIndeces(coord(:,1),xmin);
+idx = obtainAllIndeces(coord(:,1),xmin);
 
 [xmed] = (xmax-xmin)/2;
 [ymax] = max(coord(:,2));
-%idx = obtainAllIndeces(coord(:,2),ymax);
+idx = obtainAllIndeces(coord(:,2),ymax);
 
-[ymin] = min(coord(:,2),[],'all');
+[ymin,indYmin] = min(coord(:,2),[],'all');
 [ymed] = (ymax-ymin)/2;
 
 % function: assign coordinated to ordered vertices
@@ -58,6 +58,11 @@ vert(3,:) = [xmin,ymed];
 vert(4,:) = [xmed-c/2,ymin];
 vert(5,:) = [xmed+c/2,ymin];
 vert(6,:) = [xmax,ymed];
+end
+
+function isInBoundary1()
+r = @(x,y,x0,x1,y0,y1) (y-y0) - (y1-y0)*(x-x0)/(x1-x0)
+
 end
 
 

@@ -34,12 +34,9 @@ m = Mesh(s);
 m.plot();
 master_slave = computeMasterSlaveNodes(coord,div,c);
 
-% 1) make it work for any div
-% 2) plot vertices
-% 3) make rectangle example for any div + test + plotMasterSlave +
-% plotVertices
-% 4) make oblicus example for any div + test  + plotMasterSlave +
-% plotVertices
+% make it work for any div
+% plot vertices
+% create geometry fo
 
 end
 
