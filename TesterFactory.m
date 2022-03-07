@@ -4,6 +4,8 @@ classdef TesterFactory < handle
             switch type
                 case 'MasterSlaveNodesTester'
                     obj = MasterSlaveNodesTester(initialData);
+                case 'SquaredMeshCreatorTester'
+                    obj = SquaredMeshCreatorTester(initialData);
                 % Proximas clases a testear (poner el case)
             end
         end

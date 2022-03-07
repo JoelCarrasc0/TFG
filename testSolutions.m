@@ -8,7 +8,7 @@ function testSolutions
     initialData.c = sideLength.c;
     
     %TESTERS
-    testers = {'MasterSlaveNodesTester'};
+    testers = {'SquaredMeshCreatorTester','MasterSlaveNodesTester'};
     
     for iTest = 1:length(testers)
         Tester.create(testers{iTest},initialData);

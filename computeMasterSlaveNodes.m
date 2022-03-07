@@ -10,7 +10,7 @@ plotMasterSlave(masterSlave,coord)
 end
 
 function plotVertices(vert,coord)
-plotNodes(vert,coord,'green')
+    plotNodes(vert,coord,'green')
 end
 
 function plotMasterSlave(masterSlave,coord)

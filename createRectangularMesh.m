@@ -2,8 +2,8 @@ function createRectangularMesh()
 meshfilename = 'test2d_micro_joel_PRUEBA_squared.m';
 Data_prb = {'''TRIANGLE''','''SI''','''2D''','''Plane_Stress''','''ELASTIC''','''MICRO'''};
 ndim = 2;
-Xdiv = 75;
-Ydiv = 75;
+Xdiv = 6;
+Ydiv = 6;
 Xlength = 1;
 Ylength = 1;
 coord = zeros((Xdiv+1)*(Ydiv+1),ndim);
