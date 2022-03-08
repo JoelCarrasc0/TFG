@@ -5,16 +5,18 @@ vert = computeVertCoord(vert,sideLength,nsides);
 boundary = computeBoundaryCoord(boundary,vert,sideLength,nsides,div);
 coord = computeMeshCoord(coord,boundary,nsides,div,sideLength);
 connec = computeConnectivities(coord);
-%masterSlave = computeMasterSlaveNodes(boundary);
+masterSlave = obtainMasterSlaveNodes(vert,boundary,nsides,div,dim);
+% LA FUNCIÓN DE MOSTRAR ETIQUETAS DE NODOS NO FUNCIONA CORRECTAMENTE
 plotCoordinates(coord,connec);
 plotVertices(vert,coord);
+%plotBoundaryMesh(boundary);
 %plotMasterSlaveNodes(masterSlave);
 %writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength);
 
 
     function  [dim,div,sideLength,nsides] = obtainInitialData()
         dim = 2;
-        div = 12;
+        div = 2;
         sideLength = 1;
         nsides = 4;
     end
@@ -92,7 +94,9 @@ plotVertices(vert,coord);
         connec = delaunay(coord);
     end
 
-    % masterSlave = computeMasterSlaveNodes(boundary)
+    function masterSlave = obtainMasterSlaveNodes(vert,boundary,nsides,div,dim)
+        masterSlave = computeMasterSlaveNodes(vert,boundary,nsides,div,dim);
+    end
 
     function plotCoordinates(coord,connec)
         s.coord = coord;
@@ -104,6 +108,17 @@ plotVertices(vert,coord);
     function plotVertices(vert,coord)
         plotNodes(1:size(vert,1),coord,'green')
     end
+
+%         % plot boundary mesh function
+% SE DEBE MODIFICAR
+%         sI.coord = coord(nodesI,:) ;
+%         nT = length(coord);
+%         sI.connec(:,1) = 1:nT;
+%         sI.connec(:,2) = [2:nT,1];
+%         sI.kFace = -1;
+%         m = Mesh(sI);
+%         m.plot()
+
 
 %     function plotMasterSlaveNodes(masterSlave)
 %     end
