@@ -1,24 +1,24 @@
 function SquaredMeshCreator()
     [dim,div,sideLength,nsides] = obtainInitialData();
-    [coord,vert,boundary] = initializeVariables(dim,div,nsides);
-    vert = computeVertCoord(vert,sideLength,nsides);
-    boundary = computeBoundaryCoord(boundary,vert,sideLength,nsides,div);
+    [coord,vertCoord,boundary] = initializeVariables(dim,div,nsides);
+    vertCoord = computeVertCoord(vertCoord,sideLength,nsides);
+    boundary = computeBoundaryCoord(boundary,vertCoord,sideLength,nsides,div);
     coord = computeMeshCoord(coord,boundary,nsides,div,sideLength);
     connec = computeConnectivities(coord);
     plotCoordinates(coord,connec);
-    masterSlave = obtainMasterSlaveNodes(vert,boundary,nsides,div,dim);
-    % LA FUNCIÓN DE MOSTRAR ETIQUETAS DE NODOS NO FUNCIONA CORRECTAMENTE
-    plotVertices(vert,coord);
+    masterSlaveIndex = obtainMasterSlaveNodes(vertCoord,boundary,nsides,div,dim);
+    vertIndex(:,1) = 1:nsides;
+    plotVertices(vertIndex,coord);
     %plotBoundaryMesh(boundary);
-    %plotMasterSlaveNodes(masterSlave);
+    plotMasterSlaveNodes(masterSlaveIndex,coord);
     %writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength);
 end
 
 function  [dim,div,sideLength,nsides] = obtainInitialData()
     dim = 2;
-    div = 2;
+    div = 5;
     sideLength = 1;
-    nsides = 4;
+    nsides = 6;
 end
 
 function [coord,vert,boundary] = initializeVariables(dim,div,nsides)
@@ -105,8 +105,8 @@ function plotCoordinates(coord,connec)
     m.plot();
 end
     
-function plotVertices(vert,coord)
-    plotNodes(1:size(vert,1),coord,'green')
+function plotVertices(vertexIndex,coord)
+    plotNodes(vertexIndex,coord,'blue')
 end
 
 %         % plot boundary mesh function
@@ -120,26 +120,20 @@ end
 %         m.plot()
 
 
-%     function plotMasterSlaveNodes(masterSlave)
-%     end
+    function plotMasterSlaveNodes(masterSlaveIndex,coord)
+    masterIndex = masterSlaveIndex(:,1);
+    slaveIndex  = masterSlaveIndex(:,2);
+    plotNodes(masterIndex,coord,'green')
+    plotNodes(slaveIndex,coord,'red')
+    end
 
 function plotNodes(ind,coord,colorValue)
     b = num2str(ind);
     c = cellstr(b);
-    dx = 0.1; dy = 0.1;
-    x = coord(ind,1);
-    y = coord(ind,2);
+    dx = 0.01; dy = 0.01;
+    x = coord(ind,1)';
+    y = coord(ind,2)';
     t = text(x+dx,y+dy,c);
     set(t,'Color',colorValue)
 end
-
-%     function plotNodes(ind,nodes,colorValue)
-%         b = num2str(ind);
-%         c = cellstr(b);
-%         dx = 0.1; dy = 0.1;
-%         x = nodes(ind,1);
-%         y = nodes(ind,2);
-%         t = text(x+dx,y+dy,c);
-%         set(t,'Color',colorValue)
-%     end
 

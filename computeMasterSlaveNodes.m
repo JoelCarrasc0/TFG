@@ -7,57 +7,6 @@ function masterSlave = computeMasterSlaveNodes(vert,bound,nsides,div,dim)
     %plotVertices(vert,coord);
 end
 
-% function plotVertices(vert,coord)
-%     plotNodes(vert,coord,'green')
-% end
-% 
-% function plotMasterSlave(masterSlave,coord)
-% indMaster = masterSlave(1:3,1);
-% indSlave = masterSlave(1:3,2);
-% plotNodes(indMaster,coord,'blue')
-% plotNodes(indSlave,coord,'red')
-% end
-% 
-% function plotNodes(ind,coord,colorValue)
-% b = num2str(ind);
-% c = cellstr(b);
-% dx = 0.1; dy = 0.1;
-% x = coord(ind,1);
-% y = coord(ind,2);
-% t = text(x+dx,y+dy,c);
-% set(t,'Color',colorValue)
-% end
-% 
-% function idx = obtainAllIndeces(A,maxVal)
-% lia = ismember(A,maxVal);
-% idx = find(lia);
-% end
-
-% function vert = computeOrderedVertices(coord,c)
-% % function: find essential coordinates
-% [xmax] = max(coord(:,1));
-% %idx = obtainAllIndeces(coord(:,1),xmax);
-% 
-% xmin = min(coord(:,1));
-% %idx = obtainAllIndeces(coord(:,1),xmin);
-% 
-% [xmed] = (xmax-xmin)/2;
-% [ymax] = max(coord(:,2));
-% %idx = obtainAllIndeces(coord(:,2),ymax);
-% 
-% [ymin] = min(coord(:,2),[],'all');
-% [ymed] = (ymax-ymin)/2;
-% 
-% % function: assign coordinated to ordered vertices
-% % POSICIONES ORDENADAS DE FORMA ANTIHORARIA
-% vert(1,:) = [xmed+c/2,ymax];
-% vert(2,:) = [xmed-c/2,ymax];
-% vert(3,:) = [xmin,ymed];
-% vert(4,:) = [xmed-c/2,ymin];
-% vert(5,:) = [xmed+c/2,ymin];
-% vert(6,:) = [xmax,ymed];
-% end
-
 
 function [normalVec,ortoNodes] = computeBoundaryMeshes(vert,bound,nsides,div,dim)
     normalVec = zeros(nsides,2);
