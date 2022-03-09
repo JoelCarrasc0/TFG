@@ -1,14 +1,20 @@
 function testSolutions
     %PREAMBLE
-    coordinates = load('coord.mat');
-    divisions = load('div.mat');  %Algunos datos debería poder escogerlos desde dentro del test
-    sideLength = load('c.mat');
-    initialData.coord = coordinates.coord;
-    initialData.div = divisions.div;
-    initialData.c = sideLength.c;
+    %Podría cargar todos los datos iniciales desde un solo archivo de datos
+    load('vert.mat')
+    load('nsides.mat')
+    load('bound.mat')
+    load('div')
+    load('dim')
+    initialData.vert = vert;
+    initialData.nsides = nsides;
+    initialData.bound = bound;
+    initialData.div = div;
+    initialData.dim = dim;
     
     %TESTERS
-    testers = {'SquaredMeshCreatorTester','MasterSlaveNodesTester'};
+    %'SquaredMeshCreatorTester'
+    testers = {'MasterSlaveNodesTester'};
     
     for iTest = 1:length(testers)
         Tester.create(testers{iTest},initialData);

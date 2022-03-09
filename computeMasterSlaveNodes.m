@@ -1,10 +1,10 @@
 function masterSlave = computeMasterSlaveNodes(vert,bound,nsides,div,dim)
-% Init of the initial data (function)
-[normalVec,ortoNodes] = computeBoundaryMeshes(vert,bound,nsides,div,dim);
-pairs = computePairOfMeshes(normalVec,dim,nsides);
-masterSlave = computeMasterAndSlaves(ortoNodes,pairs,dim,div,nsides);
-% plotMasterSlave(masterSlave,coord)
-%plotVertices(vert,coord);
+    % Init of the initial data (function)
+    [normalVec,ortoNodes] = computeBoundaryMeshes(vert,bound,nsides,div,dim);
+    pairs = computePairOfMeshes(normalVec,dim,nsides);
+    masterSlave = computeMasterAndSlaves(ortoNodes,pairs,dim,div,nsides);
+    % plotMasterSlave(masterSlave,coord)
+    %plotVertices(vert,coord);
 end
 
 % function plotVertices(vert,coord)
@@ -60,109 +60,98 @@ end
 
 
 function [normalVec,ortoNodes] = computeBoundaryMeshes(vert,bound,nsides,div,dim)
-normalVec = zeros(nsides,2);
-for iVert = 1:nsides
-    % función de obtención de vertices
-    vertexA = vert(iVert,:);
-    if iVert == nsides
-        vertexB = vert(1,:);
-    else
-        vertexB = vert(iVert+1,:);
-    end
-    % función de obtención del vector unitario
-    vec = vertexB - vertexA;
-    mod = norm(vec);
-    vecU = vec/mod;
-    % función de obtención de la normal (siempre saliente al lado)
-    normalVec(iVert,1) = normalVec(iVert,1)+vecU(1,2);
-    normalVec(iVert,2) = normalVec(iVert,2)-vecU(1,1);
-end
-
-% Función que calcula todos los vectores posibles hasta el verticeA
-nIntNodes = nsides*(div-1);
-intNodes = bound(nsides+1:end,:);
-coord2A = zeros(nIntNodes,dim,nsides);
-for iVert = 1:nsides
-    vertexA = vert(iVert,:);
-    for iVec = 1:nIntNodes
-        vertexC = intNodes(iVec,:);
+    normalVec = zeros(nsides,2);
+    for iVert = 1:nsides
+        % función de obtención de vertices
+        vertexA = vert(iVert,:);
+        if iVert == nsides
+            vertexB = vert(1,:);
+        else
+            vertexB = vert(iVert+1,:);
+        end
         % función de obtención del vector unitario
-        vec = vertexC - vertexA;
+        vec = vertexB - vertexA;
         mod = norm(vec);
         vecU = vec/mod;
-        coord2A(iVec,:,iVert) = coord2A(iVec,:,iVert)+vecU;
+        % función de obtención de la normal (siempre saliente al lado)
+        normalVec(iVert,1) = normalVec(iVert,1)+vecU(1,2);
+        normalVec(iVert,2) = normalVec(iVert,2)-vecU(1,1);
     end
-end
 
-% find nodes with coord2A ortogonal to normal --> ortoNodes
-tol = 10e-6;
-ortoNodes = zeros(div-1,nsides);
-for iVert = 1:nsides
-    iPos = 1;
-    vectorA = normalVec(iVert,:);
-    for iVec = 1:nIntNodes
-        vectorB = coord2A(iVec,:,iVert);
-        if abs(dot(vectorA,vectorB)) < tol
-            nodeNumber = nsides+iVec;
-            ortoNodes(iPos,iVert) = ortoNodes(iPos,iVert)+nodeNumber;
-            iPos = iPos+1;
+    % Función que calcula todos los vectores posibles hasta el verticeA
+    nIntNodes = nsides*(div-1);
+    intNodes = bound(nsides+1:end,:);
+    coord2A = zeros(nIntNodes,dim,nsides);
+    for iVert = 1:nsides
+        vertexA = vert(iVert,:);
+        for iVec = 1:nIntNodes
+            vertexC = intNodes(iVec,:);
+            % función de obtención del vector unitario
+            vec = vertexC - vertexA;
+            mod = norm(vec);
+            vecU = vec/mod;
+            coord2A(iVec,:,iVert) = coord2A(iVec,:,iVert)+vecU;
         end
     end
-end
+
+    % find nodes with coord2A ortogonal to normal --> ortoNodes
+    tol = 10e-6;
+    ortoNodes = zeros(div-1,nsides);
+    for iVert = 1:nsides
+        iPos = 1;
+        vectorA = normalVec(iVert,:);
+        for iVec = 1:nIntNodes
+            vectorB = coord2A(iVec,:,iVert);
+            if abs(dot(vectorA,vectorB)) < tol
+                nodeNumber = nsides+iVec;
+                ortoNodes(iPos,iVert) = ortoNodes(iPos,iVert)+nodeNumber;
+                iPos = iPos+1;
+            end
+        end
+        % Funcionalidad que voltea los nodos de los lados opuestos a los master
+        if iVert > nsides/2
+            ortoNodes(:,iVert) = flipud(ortoNodes(:,iVert));
+        end
+    end
 end
 
 function pairs = computePairOfMeshes(normalVec,dim,nsides)
-tol = 10e-6;
-pairs = zeros(nsides/2,dim);
-irow = 1;
-for iSrch = 1:nsides/2
-    jSrch = iSrch+1;
-    vectorA = normalVec(iSrch,:);
-    found = 0;
-    while found == 0
-        vectorB = normalVec(jSrch,:);
-        cosAngle = abs(dot(vectorA,vectorB));
-        if abs(cosAngle-1) < tol
-            pairs(irow,1) = pairs(irow,1)+iSrch;
-            pairs(irow,2) = pairs(irow,2)+jSrch;
-            irow = irow+1;
-            found = 1;
-        else
-            jSrch = jSrch+1;
+    tol = 10e-6;
+    pairs = zeros(nsides/2,dim);
+    irow = 1;
+    for iSrch = 1:nsides/2
+        jSrch = iSrch+1;
+        vectorA = normalVec(iSrch,:);
+        found = 0;
+        while found == 0
+            vectorB = normalVec(jSrch,:);
+            cosAngle = abs(dot(vectorA,vectorB));
+            if abs(cosAngle-1) < tol
+                pairs(irow,1) = pairs(irow,1)+iSrch;
+                pairs(irow,2) = pairs(irow,2)+jSrch;
+                irow = irow+1;
+                found = 1;
+            else
+                jSrch = jSrch+1;
+            end
         end
     end
 end
-end
 
 function masterSlave = computeMasterAndSlaves(ortoNodes,pairs,dim,div,nsides)
-% Asignación 1 por 1 es lo más sencillo
+    masterSlave = zeros(nsides/2*(div-1),dim);
+    cont = 1;
+    for iPair = 1:nsides/2
+        lineA = pairs(iPair,1);
+        lineB = pairs(iPair,2);
+        for iDiv = 1:div-1
+            masterSlave(cont,1) = masterSlave(cont,1)+ortoNodes(iDiv,lineA);
+            masterSlave(cont,2) = masterSlave(cont,2)+ortoNodes(iDiv,lineB);
+            cont = cont+1;
+        end
+    end
 end
 
-
-% function masterSlave = computeMasterAndSlaves(interiorNodes,pairs)
-% %función que asigna los nodos sobre las rectas que corresponde
-% % HACER UNA FUNCIÓN QUE CALCULE LAS DIMENSIONES
-% masterSlave = zeros(size(interiorNodes,1)*size(pairs,1),size(pairs,2));
-% aux = 0;
-% for ipair = 1:size(pairs,1)
-%     meshA = pairs(ipair,1);
-%     meshB = pairs(ipair,2);
-%     iPos = 1;
-%     while iPos <= size(interiorNodes,1)
-%         masterSlave(iPos+aux,1) = masterSlave(iPos+aux,1)+interiorNodes(iPos,meshA);
-%         masterSlave(iPos+aux,2) = masterSlave(iPos+aux,2)+interiorNodes(iPos,meshB);
-%         if iPos == size(interiorNodes,1)
-%             aux = aux+1;
-%         end
-%         iPos = iPos+1;
-%     end
-% end
-% %función que pone en la primera fila los nodos con numeración baja
-% for iPos = 1:size(masterSlave,1)
-%     if masterSlave(iPos,1) > masterSlave(iPos,2)
-%         backup = masterSlave(iPos,1);
-%         masterSlave(iPos,1) = masterSlave(iPos,2);
-%         masterSlave(iPos,2) = backup;
-%     end
-% end
-% end
+% Test 1: passed for 2 div
+% Test 2: passed for 3 div
+% Test 3: passed for 4 div

@@ -25,12 +25,12 @@ classdef MasterSlaveNodesTester < Tester
     methods (Access = protected)
         
         function loadCorrectValues(obj)
-            mS = load('master_slave.mat');
-            obj.corrValues(1).Matrix = mS.master_slave;
+            mS = load('masterSlave.mat');
+            obj.corrValues(1).Matrix = mS.masterSlave;
         end
         
         function obtainCalculatedData(obj)
-            solution = computeMasterSlaveNodes(obj.data.coord,obj.data.div,obj.data.c);
+            solution = computeMasterSlaveNodes(obj.data.vert,obj.data.bound,obj.data.nsides,obj.data.div,obj.data.dim);
             obj.calcValues(1).Matrix = solution;
         end
     
