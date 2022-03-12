@@ -1,7 +1,9 @@
 function SquaredMeshCreator()
-    [dim,div,sideLength,nsides] = obtainInitialData();
-    [coord,vertCoord,boundary] = initializeVariables(dim,div,nsides);
-    vertCoord = computeVertCoord(vertCoord,sideLength,nsides);
+    [dim,div,c,theta] = obtainInitialData();
+    nsides = obtainPolygonSides(c,theta,div);
+    [coord,vertCoord,boundary] = initializeVariables(dim,div,nsides); 
+    vertCoord = computeVertCoord(vertCoord,c,theta,nsides); 
+    
     boundary = computeBoundaryCoord(boundary,vertCoord,sideLength,nsides,div);
     coord = computeMeshCoord(coord,boundary,nsides,div,sideLength);
     connec = computeConnectivities(coord);
@@ -14,30 +16,72 @@ function SquaredMeshCreator()
     %writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength);
 end
 
-function  [dim,div,sideLength,nsides] = obtainInitialData()
+function  [dim,div,c,theta] = obtainInitialData()
+% Datos de entrada del programa. COMPLETAMENTE GENERAL
     dim = 2;
-    div = 5;
-    sideLength = 1;
-    nsides = 6;
+    div = [2,2,2]; % PROBLEMA 1: Dilema de las divisiones. DEBERIA SER DATO DE ENTRADA O 
+    % SOLO IMPONER LAS DIVISIONES DEL PRIMER LADO Y OBTENER LAS DEMÁS POR 
+    % RELACIÓN LINEAL ENTRE LA LONGITUD DE LOS LADOS
+    c = [1,1,1];
+    theta = [0,60,120];
 end
 
-function [coord,vert,boundary] = initializeVariables(dim,div,nsides)
-    nnodes = div^2+2*div+1;
-    vert = zeros(nsides,dim);
-    boundary = zeros(nsides*div,dim);
+function nsides = obtainPolygonSides(c,theta,div)
+% Obtención de nº de lados y filtro. COMPLETAMENTE GENERAL
+    if length(c) == length(theta) && length(c) == length(div)
+        nsides = 2*length(c);
+    else
+        cprintf('red','CRYTICAL ERROR. Vectors c, theta and div must have the same length\n');
+    end
+end
+
+function [coord,vertCoord,boundary] = initializeVariables(dim,div,nsides)
+% Inicialización de variables principales. NO ES GENERAL (nnodes variable)
+    divA = div(1);
+    divB = div(2);
+    boundNodes = nsides*(1+1/2*(divA+divB-2)); %Válido para cuatro lados
+    nnodes = boundNodes+(divA-1)*(divB-1); %Válido para cuatro lados
+    %PROBLEMA 2: NO ES POSIBLE UNIFICAR TODOS LOS CALCULOS DE NNODES
+    vertCoord = zeros(nsides,dim);
+    boundary = zeros(boundNodes,dim);
     coord = zeros(nnodes,dim);
 end
 
-function vert = computeVertCoord(vert,sideLength,nsides) %GENERAL PARA POLÍGONOS CON LADOS IGUALES
-    theta0 = 0;
-    thetaVar = 360/nsides;
+function vertCoord = computeVertCoord(vertCoord,c,theta,nsides)
+% Obtención de los vertices. COMPLETAMENTE GENERAL
     c0 = [0,0];
-    for iEdge = 2:nsides
-        theta = theta0 + (iEdge-2)*thetaVar;
-        vert(iEdge,:) = vert(iEdge,:)+c0+sideLength.*[cosd(theta) sind(theta)];
-        c0 = vert(iEdge,:);
+    for iMaster = 1:nsides/2
+        pos = computeThePosition(c0,c(iMaster),theta(iMaster));
+        vertCoord(iMaster+1,:) = vertCoord(iMaster+1,:)+pos;
+        c0 = pos;
+    end
+    for iSlave = 1:nsides/2
+        pos = computeThePosition(c0,c(iSlave),theta(iSlave)+180);
+        if iSlave == nsides/2
+            if vertCoord(1,:) ~= pos
+                cprintf('red','CRYTICAL ERROR. Vertices computed wrongly \n');
+            end
+        else
+            vertCoord(iMaster+iSlave+1,:) = vertCoord(iMaster+iSlave+1,:)+pos;
+            c0 = pos;
+        end
     end
 end
+
+function pos = computeThePosition(c0,c,theta)
+    pos = c0+c.*[cosd(theta) sind(theta)];
+end
+
+% function vert = computeVertCoord(vert,sideLength,nsides) %GENERAL PARA POLÍGONOS CON LADOS IGUALES
+%     theta0 = 0;
+%     thetaVar = 360/nsides;
+%     c0 = [0,0];
+%     for iEdge = 2:nsides
+%         theta = theta0 + (iEdge-2)*thetaVar;
+%         vert(iEdge,:) = vert(iEdge,:)+c0+sideLength.*[cosd(theta) sind(theta)];
+%         c0 = vert(iEdge,:);
+%     end
+% end
 
 function boundary = computeBoundaryCoord(boundary,vert,sideLength,nsides,div) %GENERAL PARA POLÍGONOS CON LADOS IGUALES
     boundary(1:nsides,:) = boundary(1:nsides,:)+vert;
