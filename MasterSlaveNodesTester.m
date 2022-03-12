@@ -19,7 +19,7 @@ classdef MasterSlaveNodesTester < Tester
             obj.obtainCalculatedData();
             obj.verify();
         end
-
+        
     end
     
     methods (Access = protected)

@@ -2,9 +2,9 @@ function SquaredMeshCreator()
     [dim,div,c,theta] = obtainInitialData();
     nsides = obtainPolygonSides(c,theta,div);
     [coord,vertCoord,boundary] = initializeVariables(dim,div,nsides); 
-    vertCoord = computeVertCoord(vertCoord,c,theta,nsides); 
+    vertCoord = computeVertCoord(vertCoord,c,theta,nsides);
+    boundary = computeBoundaryCoord(boundary,vertCoord,c,theta,nsides,div); 
     
-    boundary = computeBoundaryCoord(boundary,vertCoord,sideLength,nsides,div);
     coord = computeMeshCoord(coord,boundary,nsides,div,sideLength);
     connec = computeConnectivities(coord);
     plotCoordinates(coord,connec);
@@ -39,9 +39,9 @@ function [coord,vertCoord,boundary] = initializeVariables(dim,div,nsides)
 % Inicialización de variables principales. NO ES GENERAL (nnodes variable)
     divA = div(1);
     divB = div(2);
+    %PROBLEMA 2: NO ES POSIBLE UNIFICAR TODOS LOS CALCULOS DE NNODES
     boundNodes = nsides*(1+1/2*(divA+divB-2)); %Válido para cuatro lados
     nnodes = boundNodes+(divA-1)*(divB-1); %Válido para cuatro lados
-    %PROBLEMA 2: NO ES POSIBLE UNIFICAR TODOS LOS CALCULOS DE NNODES
     vertCoord = zeros(nsides,dim);
     boundary = zeros(boundNodes,dim);
     coord = zeros(nnodes,dim);
@@ -68,37 +68,35 @@ function vertCoord = computeVertCoord(vertCoord,c,theta,nsides)
     end
 end
 
+function boundary = computeBoundaryCoord(boundary,vertCoord,c,theta,nsides,div)
+% Obtención de las coord de la boundary. COMPLETAMENTE GENERAL
+    boundary(1:nsides,:) = boundary(1:nsides,:)+vertCoord;
+    cont = nsides+1;
+    for iMaster = 1:nsides/2
+        c0 = vertCoord(iMaster,:);
+        for iDiv = 1:div(iMaster)-1
+            pos = computeThePosition(c0,c(iMaster)/div(iMaster),theta(iMaster));
+            boundary(cont,:) = boundary(cont,:)+pos;
+            cont = cont+1;
+            c0 = pos;
+        end
+    end
+    for iSlave = 1:nsides/2
+        c0 = vertCoord(iMaster+iSlave,:);
+        for iDiv = 1:div(iSlave)-1
+            pos = computeThePosition(c0,c(iSlave)/div(iSlave),theta(iSlave)+180);
+            boundary(cont,:) = boundary(cont,:)+pos;
+            cont = cont+1;
+            c0 = pos;
+        end
+    end
+end
+
 function pos = computeThePosition(c0,c,theta)
     pos = c0+c.*[cosd(theta) sind(theta)];
 end
 
-% function vert = computeVertCoord(vert,sideLength,nsides) %GENERAL PARA POLÍGONOS CON LADOS IGUALES
-%     theta0 = 0;
-%     thetaVar = 360/nsides;
-%     c0 = [0,0];
-%     for iEdge = 2:nsides
-%         theta = theta0 + (iEdge-2)*thetaVar;
-%         vert(iEdge,:) = vert(iEdge,:)+c0+sideLength.*[cosd(theta) sind(theta)];
-%         c0 = vert(iEdge,:);
-%     end
-% end
 
-function boundary = computeBoundaryCoord(boundary,vert,sideLength,nsides,div) %GENERAL PARA POLÍGONOS CON LADOS IGUALES
-    boundary(1:nsides,:) = boundary(1:nsides,:)+vert;
-    contInt = nsides+1;
-    for iSide = 1:nsides
-        theta0 = 0;
-        thetaVar = 360/nsides;
-        c0 = vert(iSide,:);
-        theta = theta0 + (iSide-1)*thetaVar;
-        for iNode = 1:div-1
-            segment = sideLength/div;
-            boundary(contInt,:) = boundary(contInt,:)+c0+segment.*[cosd(theta) sind(theta)];
-            c0 = boundary(contInt,:);
-            contInt = contInt+1;
-        end
-    end
-end
 
 function coord = computeMeshCoord(coord,boundary,nsides,div,sideLength)
     coord(1:nsides*div,:) = coord(1:nsides*div,:)+boundary;

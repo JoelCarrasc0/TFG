@@ -2,7 +2,7 @@ function createRegularHexagonMesh()
 meshfilename = 'test2d_micro_joel_PRUEBA_hexagon.m';
 Data_prb = {'''TRIANGLE''','''SI''','''2D''','''Plane_Stress''','''ELASTIC''','''MICRO'''};
 ndim = 2;
-c = 1;
+c = 3;
 div = 2; % Divisiones por lado del hexagono
 % Tres divisiones equivalen a cuatro nodos por lado 
 ydiv = div;
@@ -33,13 +33,5 @@ s.connec = connec;
 m = Mesh(s);
 m.plot();
 master_slave = computeMasterSlaveNodes(coord,div,c);
-
-% 1) make it work for any div
-% 2) plot vertices
-% 3) make rectangle example for any div + test + plotMasterSlave +
-% plotVertices
-% 4) make oblicus example for any div + test  + plotMasterSlave +
-% plotVertices
-
 end
 
