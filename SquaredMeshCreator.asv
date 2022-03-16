@@ -107,7 +107,6 @@ function pos = computeThePosition(c0,c,theta)
 end
 
 function coord = computeMeshCoord(coord,boundary,nsides,divUnit,div,theta,boundNodes)
-% TEST PERFORMANCE
     coord(1:boundNodes,:) = coord(1:boundNodes,:)+boundary;
     contInt = boundNodes+1;
     layer = 1;
@@ -125,9 +124,9 @@ function coord = computeMeshCoord(coord,boundary,nsides,divUnit,div,theta,boundN
             for iMaster = 1:nsides/2
                 masterDiv = ndiv(iMaster);
                 for iDiv = 1:masterDiv
-                    contInt = contInt+1;
                     pos = computeThePosition(c0,segment,theta(iMaster));
                     coord(contInt,:) = coord(contInt,:)+pos;
+                    contInt = contInt+1;
                     c0 = pos;
                 end
             end
@@ -135,7 +134,6 @@ function coord = computeMeshCoord(coord,boundary,nsides,divUnit,div,theta,boundN
                 if iSlave == nsides/2
                     slaveDiv = ndiv-1;
                 else
-                    slaveDiv = ndiv;
                 end
                 for iDiv = 1:slaveDiv
                     pos = computeThePosition(c0,segment,theta(iSlave)+180);
