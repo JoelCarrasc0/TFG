@@ -1,15 +1,14 @@
 function SquaredMeshCreator()
     [dim,divUnit,c,theta] = obtainInitialData();
     nsides = obtainPolygonSides(c,theta);
-    [coord,vertCoord,boundary,boundNodes,div] = initializeVariables(dim,divUnit,nsides,c); 
+    [coord,vertCoord,boundary,boundNodes,div] = initializeVariables(dim,divUnit,nsides,c); %Falta establecer nnodes para coord
     vertCoord = computeVertCoord(vertCoord,c,theta,nsides);
     boundary = computeBoundaryCoord(boundary,vertCoord,c,theta,nsides,div); 
-    coord = computeMeshCoord(coord,boundary,nsides,divUnit,div,theta,boundNodes);
-    
-    
+    coord = computeMeshCoord(nsides,vertCoord,divUnit,c,boundary,boundNodes,coord,div);
     connec = computeConnectivities(coord);
     plotCoordinates(coord,connec);
-    masterSlaveIndex = obtainMasterSlaveNodes(vertCoord,boundary,nsides,div,dim);
+    
+    masterSlaveIndex = obtainMasterSlaveNodes(vertCoord,boundary,nsides,div,dim); %%PENDIENTE DE REVISIÓN. SOLO ERA FUNCIONAL PARA POLIGONOS DE LADOS IGUALES
     vertIndex(:,1) = 1:nsides;
     plotVertices(vertIndex,coord);
     %plotBoundaryMesh(boundary);
@@ -20,9 +19,9 @@ end
 function  [dim,divUnit,c,theta] = obtainInitialData()
 % Datos de entrada del programa. COMPLETAMENTE GENERAL
     dim = 2;
-    divUnit = 2; %Divisions/length of the side
-    c = [2,1];
-    theta = [0,90];
+    divUnit = 3; %Divisions/length of the side
+    c = [2,1,2];
+    theta = [0,60,90];
 end
 
 function nsides = obtainPolygonSides(c,theta)
@@ -49,12 +48,13 @@ div = divUnit*c;
             divC = div(3);
             boundNodes = nsides*(1+1/3*(divA+divB+divC-3));
             % NO CORRECTO (MANERA DE OBTENERLO PARA HEXAGONOS IRREGULARES CON DIFERENTES DIVISIONES POR LADO?)
+            % CORREGIR PARA EL NUEVO CASO DE CÁLCULO DE COORD
             nnodes = nsides/2*(divA+divB+divC+3)*(divA+divB+divC)+3;
             % Posibilidad de introducir mas polígonos
     end
     vertCoord = zeros(nsides,dim);
     boundary = zeros(boundNodes,dim);
-    coord = zeros(nnodes,dim);
+    coord = zeros(103,dim);
 end
 
 function vertCoord = computeVertCoord(vertCoord,c,theta,nsides)
@@ -106,93 +106,93 @@ function pos = computeThePosition(c0,c,theta)
     pos = c0+c.*[cosd(theta) sind(theta)];
 end
 
-function coord = computeMeshCoord(coord,boundary,nsides,divUnit,div,theta,boundNodes)
-% TEST PERFORMANCE
-    coord(1:boundNodes,:) = coord(1:boundNodes,:)+boundary;
-    contInt = boundNodes+1;
-    layer = 1;
-    segment = 1/divUnit; % Según la definición de divUnit
-    ndiv = div-1;
-    while max(ndiv) > 0
-        theta0 = theta(nsides/2)-theta(nsides/2-1);
-        % La coordenada inicial es característica del ángulo y polígono
-        c0 = obtainInitialCoord(segment,theta0,layer);
-        if max(ndiv) == 1
-            coord(end,:) = c0;
-        else
-            coord(contInt,:) = c0;
-            ndiv = ndiv-1;
+function coord = computeMeshCoord(nsides,vertCoord,divUnit,c,boundary,boundNodes,coord,div)
+coord(1:boundNodes,:) = coord(1:boundNodes,:)+boundary;
+intNode = boundNodes+1;
+    switch nsides
+        case 4
+        % Compute coords by intersections
+            vA = vertCoord(2,:)-vertCoord(1,:);
+            mA = norm(vA);
+            vA = vA/mA;
+            vB = vertCoord(3,:)-vertCoord(2,:);
+            mB = norm(vB);
+            vB = vB/mB;
+            nodesX = divUnit*c(1)-1;
+            nodesY = divUnit*c(2)-1;
+            for jNodes = 1:nodesY
+                pB = boundary(boundNodes+1-jNodes,:);
+                for iNodes = 1:nodesX
+                    pA = boundary(nsides+iNodes,:);
+                    if vA(1) == 0
+                        x = pB(1);
+                        y = (x-pA(1))*vB(2)/vB(1)+pA(2);
+                    elseif vB(1) == 0
+                        x = pA(1);
+                        y = (x-pB(1))*vA(2)/vA(1)+pB(2);
+                    else
+                        x = (pB(2)-pA(2)+pA(1)*vB(2)/vB(1)+pB(1)*vA(2)/vA(1))/(vB(2)/vB(1)-vA(2)/vA(1));
+                        y = (x-pB(1))*vA(2)/vA(1)+pB(2);
+                    end
+                    coord(intNode,:) = coord(intNode,:)+[x y];
+                    intNode = intNode+1;
+                end
+            end
+
+        case 6
+        % Compute coords by diagonals
+        % Sitúa el nodo central
+        vA = vertCoord(4,:)-vertCoord(1,:);
+        pA = vertCoord(1,:);
+        centerVec = vA/2;
+        O = pA+centerVec;
+        coord(intNode,:) = coord(intNode,:)+O;
+        % Cálculo de las divisiones a aplicar por recta
+        diagDiv = max(div);
+        div = div-1;
+        intNode = intNode+1;
+        % Aplicación de las divisiones por cada semirecta
+        for iDiv = 1:diagDiv-1
+            for iDiag = 1:nsides
+                diagA = O-vertCoord(iDiag,:);
+                vecDiv = iDiv*diagA/diagDiv;
+                pos = vertCoord(iDiag,:)+vecDiv;
+                coord(intNode,:) = coord(intNode,:)+pos;
+                intNode = intNode+1;
+            end
+            % Aplicar aquí los nodos internos a las rectas
+            newVert = coord(intNode-nsides:intNode-1,:);
             for iMaster = 1:nsides/2
-                masterDiv = ndiv(iMaster);
-                for iDiv = 1:masterDiv
-                    contInt = contInt+1;
-                    pos = computeThePosition(c0,segment,theta(iMaster));
-                    coord(contInt,:) = coord(contInt,:)+pos;
-                    c0 = pos;
+                vertA = newVert(iMaster,:);
+                vertB = newVert(iMaster+1,:);
+                for intDiv = 1:div(iMaster)-1
+                    sideVec = intDiv*(vertB-vertA)/div(iMaster);
+                    sidePos = vertA+sideVec;
+                    coord(intNode,:) = coord(intNode,:)+sidePos;
+                    intNode = intNode+1;
                 end
             end
             for iSlave = 1:nsides/2
                 if iSlave == nsides/2
-                    slaveDiv = ndiv-1;
+                    vertA = newVert(end,:);
+                    vertB = newVert(1,:);
                 else
-                    slaveDiv = ndiv;
+                    vertA = newVert(iMaster+iSlave,:);
+                    vertB = newVert(iMaster+iSlave+1,:);
                 end
-                for iDiv = 1:slaveDiv
-                    pos = computeThePosition(c0,segment,theta(iSlave)+180);
-                    coord(contInt,:) = coord(contInt,:)+pos;
-                    contInt = contInt+1;
-                    c0 = pos;
+                for intDiv = 1:div(iSlave)-1
+                    sideVec = intDiv*(vertB-vertA)/div(iMaster);
+                    sidePos = vertA+sideVec;
+                    coord(intNode,:) = coord(intNode,:)+sidePos;
+                    intNode = intNode+1;
                 end
             end
+            div = div-1;
         end
-        ndiv = ndiv-2;
-        layer = layer+1;
-        contInt = contInt+1;
     end
 end
+% TEST PERFORMANCE AND CORRECT ERRORS
 
-function c0 = obtainInitialCoord(segment,theta0,layer)
-    if theta0 == 90
-        c0 = layer*segment*[1 1];
-    else
-        % PROBLEMA 3: problema del nodo inicial al no tener 90 grados
-    end
-    % Con ecuaciones de la recta se puede obtener la intersección
-end
-
-% function coord = computeMeshCoord(coord,boundary,nsides,div,sideLength)
-%     coord(1:nsides*div,:) = coord(1:nsides*div,:)+boundary;
-%     contInt = nsides*div+1;
-%     layer = 1;
-%     segment = sideLength/div;
-%     ndiv = div-1;
-%     while ndiv > 0
-%         c0 = layer*[segment segment];
-%         if ndiv == 1
-%             coord(end,:) = c0;
-%         else
-%             coord(contInt,:) = c0;
-%             for iSide = 1:nsides
-%                 theta0 = 0;
-%                 thetaVar = 360/nsides;
-%                 theta = theta0 + (iSide-1)*thetaVar;
-%                 if iSide == nsides
-%                     nintNode = ndiv-2;
-%                 else
-%                     nintNode = ndiv-1;
-%                 end
-%                 for iNode = 1:nintNode
-%                     contInt = contInt+1;
-%                     coord(contInt,:) = coord(contInt,:)+c0+segment.*[cosd(theta) sind(theta)];
-%                     c0 = coord(contInt,:);
-%                 end
-%             end
-%         end
-%         ndiv = ndiv-2;
-%         layer = layer+1;
-%         contInt = contInt+1;
-%     end
-% end
 
 function connec = computeConnectivities(coord)
     connec = delaunay(coord);

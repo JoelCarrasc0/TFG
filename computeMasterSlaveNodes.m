@@ -28,7 +28,8 @@ function [normalVec,ortoNodes] = computeBoundaryMeshes(vert,bound,nsides,div,dim
     end
 
     % Función que calcula todos los vectores posibles hasta el verticeA
-    nIntNodes = nsides*(div-1);
+    %nIntNodes = nsides*(div-1);
+    nIntNodes = sum(2*(div-1));
     intNodes = bound(nsides+1:end,:);
     coord2A = zeros(nIntNodes,dim,nsides);
     for iVert = 1:nsides
@@ -101,6 +102,4 @@ function masterSlave = computeMasterAndSlaves(ortoNodes,pairs,dim,div,nsides)
     end
 end
 
-% Test 1: passed for 2 div
-% Test 2: passed for 3 div
-% Test 3: passed for 4 div
+% Tests for different number of divs in every side
