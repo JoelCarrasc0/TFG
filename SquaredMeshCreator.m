@@ -1,7 +1,7 @@
 function SquaredMeshCreator()
     [dim,divUnit,c,theta] = obtainInitialData();
     nsides = obtainPolygonSides(c,theta);
-    [coord,vertCoord,boundary,boundNodes,div] = initializeVariables(dim,divUnit,nsides,c); %Falta establecer nnodes para coord
+    [coord,vertCoord,boundary,boundNodes,div] = initializeVariables(dim,divUnit,nsides,c); 
     vertCoord = computeVertCoord(vertCoord,c,theta,nsides);
     boundary = computeBoundaryCoord(boundary,vertCoord,c,theta,nsides,div); 
     coord = computeMeshCoord(nsides,vertCoord,divUnit,c,boundary,boundNodes,coord,div);
@@ -19,9 +19,9 @@ end
 function  [dim,divUnit,c,theta] = obtainInitialData()
 % Datos de entrada del programa. COMPLETAMENTE GENERAL
     dim = 2;
-    divUnit = 3; %Divisions/length of the side
-    c = [2,1,2];
-    theta = [0,60,90];
+    divUnit = 2; %Divisions/length of the side
+    c = [1,1];
+    theta = [0,60];
 end
 
 function nsides = obtainPolygonSides(c,theta)
@@ -47,14 +47,22 @@ div = divUnit*c;
             divB = div(2);
             divC = div(3);
             boundNodes = nsides*(1+1/3*(divA+divB+divC-3));
-            % NO CORRECTO (MANERA DE OBTENERLO PARA HEXAGONOS IRREGULARES CON DIFERENTES DIVISIONES POR LADO?)
-            % CORREGIR PARA EL NUEVO CASO DE CÁLCULO DE COORD
-            nnodes = nsides/2*(divA+divB+divC+3)*(divA+divB+divC)+3;
-            % Posibilidad de introducir mas polígonos
+            nnodes = 0;
+            sideNodes = div-1;
+            while max(sideNodes) >= 1
+                for i = 1:length(sideNodes)
+                    if sideNodes(i) <= 0
+                        sideNodes(i) = 0;
+                    end
+                end
+                nnodes = nnodes+nsides+sum(2*sideNodes);
+                sideNodes = sideNodes-1;
+            end
+            nnodes = nnodes+nsides+1;
     end
     vertCoord = zeros(nsides,dim);
     boundary = zeros(boundNodes,dim);
-    coord = zeros(103,dim);
+    coord = zeros(nnodes,dim);
 end
 
 function vertCoord = computeVertCoord(vertCoord,c,theta,nsides)
@@ -107,6 +115,8 @@ function pos = computeThePosition(c0,c,theta)
 end
 
 function coord = computeMeshCoord(nsides,vertCoord,divUnit,c,boundary,boundNodes,coord,div)
+% Obtención de las coordenadas dentro de la boundary. GENERAL para los
+% casos considerados
 coord(1:boundNodes,:) = coord(1:boundNodes,:)+boundary;
 intNode = boundNodes+1;
     switch nsides

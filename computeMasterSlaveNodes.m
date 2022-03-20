@@ -3,8 +3,6 @@ function masterSlave = computeMasterSlaveNodes(vert,bound,nsides,div,dim)
     [normalVec,ortoNodes] = computeBoundaryMeshes(vert,bound,nsides,div,dim);
     pairs = computePairOfMeshes(normalVec,dim,nsides);
     masterSlave = computeMasterAndSlaves(ortoNodes,pairs,dim,div,nsides);
-    % plotMasterSlave(masterSlave,coord)
-    %plotVertices(vert,coord);
 end
 
 
@@ -45,6 +43,7 @@ function [normalVec,ortoNodes] = computeBoundaryMeshes(vert,bound,nsides,div,dim
     end
 
     % find nodes with coord2A ortogonal to normal --> ortoNodes
+    %% EL PROBLEMA GENERAL SOLO ESTÁ EN ESTA FUNCIÓN
     tol = 10e-6;
     ortoNodes = zeros(div-1,nsides);
     for iVert = 1:nsides
@@ -89,7 +88,7 @@ function pairs = computePairOfMeshes(normalVec,dim,nsides)
 end
 
 function masterSlave = computeMasterAndSlaves(ortoNodes,pairs,dim,div,nsides)
-    masterSlave = zeros(nsides/2*(div-1),dim);
+    masterSlave = zeros(nsides/2*(sum(div-1)),dim);
     cont = 1;
     for iPair = 1:nsides/2
         lineA = pairs(iPair,1);
