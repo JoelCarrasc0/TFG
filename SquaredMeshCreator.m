@@ -11,7 +11,7 @@ function SquaredMeshCreator()
     vertIndex(:,1) = 1:nsides;
     plotVertices(vertIndex,coord);
     plotMasterSlaveNodes(masterSlaveIndex,coord);
-    writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength);
+    %writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength);
 end
 
 function  [dim,divUnit,c,theta] = obtainInitialData()
