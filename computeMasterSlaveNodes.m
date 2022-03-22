@@ -1,8 +1,8 @@
-function masterSlave = computeMasterSlaveNodes(vert,bound,nsides,div,dim)
+function masterSlave = computeMasterSlaveNodes(vert,bound,nsides,div,dim,boundNodes)
     % Init of the initial data (function)
     [normalVec,ortoNodes] = computeBoundaryMeshes(vert,bound,nsides,div,dim);
     pairs = computePairOfMeshes(normalVec,dim,nsides);
-    masterSlave = computeMasterAndSlaves(ortoNodes,pairs,dim,div,nsides);
+    masterSlave = computeMasterAndSlaves(ortoNodes,pairs,dim,div,nsides,boundNodes);
 end
 
 
@@ -43,9 +43,8 @@ function [normalVec,ortoNodes] = computeBoundaryMeshes(vert,bound,nsides,div,dim
     end
 
     % find nodes with coord2A ortogonal to normal --> ortoNodes
-    %% EL PROBLEMA GENERAL SOLO ESTÁ EN ESTA FUNCIÓN
     tol = 10e-6;
-    ortoNodes = zeros(div-1,nsides);
+    ortoNodes = zeros(max(div)-1,nsides);
     for iVert = 1:nsides
         iPos = 1;
         vectorA = normalVec(iVert,:);
@@ -59,7 +58,7 @@ function [normalVec,ortoNodes] = computeBoundaryMeshes(vert,bound,nsides,div,dim
         end
         % Funcionalidad que voltea los nodos de los lados opuestos a los master
         if iVert > nsides/2
-            ortoNodes(:,iVert) = flipud(ortoNodes(:,iVert));
+            ortoNodes(:,iVert) = sort(ortoNodes(:,iVert),'descend');
         end
     end
 end
@@ -87,18 +86,16 @@ function pairs = computePairOfMeshes(normalVec,dim,nsides)
     end
 end
 
-function masterSlave = computeMasterAndSlaves(ortoNodes,pairs,dim,div,nsides)
-    masterSlave = zeros(nsides/2*(sum(div-1)),dim);
+function masterSlave = computeMasterAndSlaves(ortoNodes,pairs,dim,div,nsides,boundNodes)
+    masterSlave = zeros((boundNodes-nsides)/2,dim);
     cont = 1;
     for iPair = 1:nsides/2
         lineA = pairs(iPair,1);
         lineB = pairs(iPair,2);
-        for iDiv = 1:div-1
+        for iDiv = 1:div(iPair)-1
             masterSlave(cont,1) = masterSlave(cont,1)+ortoNodes(iDiv,lineA);
             masterSlave(cont,2) = masterSlave(cont,2)+ortoNodes(iDiv,lineB);
             cont = cont+1;
         end
     end
 end
-
-% Tests for different number of divs in every side

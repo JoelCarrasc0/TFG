@@ -7,21 +7,19 @@ function SquaredMeshCreator()
     coord = computeMeshCoord(nsides,vertCoord,divUnit,c,boundary,boundNodes,coord,div);
     connec = computeConnectivities(coord);
     plotCoordinates(coord,connec);
-    
-    masterSlaveIndex = obtainMasterSlaveNodes(vertCoord,boundary,nsides,div,dim); %%PENDIENTE DE REVISIÓN. SOLO ERA FUNCIONAL PARA POLIGONOS DE LADOS IGUALES
+    masterSlaveIndex = obtainMasterSlaveNodes(vertCoord,boundary,nsides,div,dim,boundNodes); 
     vertIndex(:,1) = 1:nsides;
     plotVertices(vertIndex,coord);
-    %plotBoundaryMesh(boundary);
     plotMasterSlaveNodes(masterSlaveIndex,coord);
-    %writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength);
+    writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength);
 end
 
 function  [dim,divUnit,c,theta] = obtainInitialData()
 % Datos de entrada del programa. COMPLETAMENTE GENERAL
     dim = 2;
-    divUnit = 2; %Divisions/length of the side
-    c = [1,1];
-    theta = [0,60];
+    divUnit = 5; %Divisions/length of the side
+    c = [2,1,2];
+    theta = [0,60,90];
 end
 
 function nsides = obtainPolygonSides(c,theta)
@@ -60,6 +58,7 @@ div = divUnit*c;
             end
             nnodes = nnodes+nsides+1;
     end
+    boundNodes = round(boundNodes);
     vertCoord = zeros(nsides,dim);
     boundary = zeros(boundNodes,dim);
     coord = zeros(nnodes,dim);
@@ -191,7 +190,7 @@ intNode = boundNodes+1;
                     vertB = newVert(iMaster+iSlave+1,:);
                 end
                 for intDiv = 1:div(iSlave)-1
-                    sideVec = intDiv*(vertB-vertA)/div(iMaster);
+                    sideVec = intDiv*(vertB-vertA)/div(iSlave);
                     sidePos = vertA+sideVec;
                     coord(intNode,:) = coord(intNode,:)+sidePos;
                     intNode = intNode+1;
@@ -201,15 +200,13 @@ intNode = boundNodes+1;
         end
     end
 end
-% TEST PERFORMANCE AND CORRECT ERRORS
-
 
 function connec = computeConnectivities(coord)
     connec = delaunay(coord);
 end
 
-function masterSlave = obtainMasterSlaveNodes(vert,boundary,nsides,div,dim)
-    masterSlave = computeMasterSlaveNodes(vert,boundary,nsides,div,dim);
+function masterSlave = obtainMasterSlaveNodes(vert,boundary,nsides,div,dim,boundNodes)
+    masterSlave = computeMasterSlaveNodes(vert,boundary,nsides,div,dim,boundNodes);
 end
 
 function plotCoordinates(coord,connec)
@@ -223,23 +220,12 @@ function plotVertices(vertexIndex,coord)
     plotNodes(vertexIndex,coord,'blue')
 end
 
-%         % plot boundary mesh function
-% SE DEBE MODIFICAR
-%         sI.coord = coord(nodesI,:) ;
-%         nT = length(coord);
-%         sI.connec(:,1) = 1:nT;
-%         sI.connec(:,2) = [2:nT,1];
-%         sI.kFace = -1;
-%         m = Mesh(sI);
-%         m.plot()
-
-
-    function plotMasterSlaveNodes(masterSlaveIndex,coord)
+function plotMasterSlaveNodes(masterSlaveIndex,coord)
     masterIndex = masterSlaveIndex(:,1);
     slaveIndex  = masterSlaveIndex(:,2);
     plotNodes(masterIndex,coord,'green')
     plotNodes(slaveIndex,coord,'red')
-    end
+end
 
 function plotNodes(ind,coord,colorValue)
     b = num2str(ind);
@@ -250,4 +236,181 @@ function plotNodes(ind,coord,colorValue)
     t = text(x+dx,y+dy,c);
     set(t,'Color',colorValue)
 end
+
+function writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength)
+    fileID = fopen(meshfilename,'w');
+    fprintf(fileID,'%c','%% Data file');
+    fprintf(fileID,'\n\n');
+
+    % Characteristics
+    fprintf(fileID,'%c','Data_prb = {');
+    fprintf(fileID,'\n');
+    for k = 1:length(Data_prb)
+        fprintf(fileID,'%s ;\r\n',Data_prb{k});
+    end
+    fprintf(fileID,'%c','};');
+    fprintf(fileID,'\n\n\n');
+
+    % Coordinates
+    fprintf(fileID,'%c','coord = [');
+    fprintf(fileID,'\n');
+    for k = 1:size(m.coord,1)
+        fprintf(fileID,'%g %g %g %g\r\n',k,m.coord(k,1),m.coord(k,2),0);
+    end
+    fprintf(fileID,'%c','];');
+    fprintf(fileID,'\n\n');
+
+    % Point loads
+    fprintf(fileID,'%c','pointload = [');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','];');
+    fprintf(fileID,'\n\n\n\n');
+
+    % Connectivities
+    fprintf(fileID,'%c','connec = [');
+    fprintf(fileID,'\n');
+    for k = 1:size(m.connec,1)
+        fprintf(fileID,'%g %g %g %g\r\n',k,m.connec(k,1),m.connec(k,2),m.connec(k,3));
+    end
+    fprintf(fileID,'%c','];');
+    fprintf(fileID,'\n\n');
+
+    % Variable prescribed
+    fprintf(fileID,'%c','%% Variable Prescribed');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%s \t %s \t %s','% Node','Dimension','Value');
+    fprintf(fileID,'\n\n');
+    fprintf(fileID,'%c','dirichlet_data = [');
+    fprintf(fileID,'\n');
+    for k = 1:size(m.coord,1)
+        if ((m.coord(k,1) == 0) && (m.coord(k,2) == 0))||((m.coord(k,1) == 0) && (m.coord(k,2) == Ylength))||((m.coord(k,1) == Xlength) && (m.coord(k,2) == 0))||((m.coord(k,1) == Xlength) && (m.coord(k,2) == Ylength))
+            fprintf(fileID,'%g %g %g\r\n',k,1,0);
+            fprintf(fileID,'%g %g %g\r\n',k,2,0);
+        end
+    end
+    fprintf(fileID,'%c','];');
+    fprintf(fileID,'\n\n\n');
+
+    % Force presecribed
+    fprintf(fileID,'%c','%% Force Prescribed');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%s \t %s \t %s','% Node','Dimension','Value');
+    fprintf(fileID,'\n\n');
+    fprintf(fileID,'%c','pointload_complete = [');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','];');
+    fprintf(fileID,'\n\n\n');
+
+    % Volumetric force
+    fprintf(fileID,'%c','%% Volumetric Force');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%s \t %s \t %s','% Element','Dimension','Force_Dim');
+    fprintf(fileID,'\n\n');
+    fprintf(fileID,'%c','Vol_force = [');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','];');
+    fprintf(fileID,'\n\n\n');
+
+    % Group elements
+    fprintf(fileID,'%c','%% Group Elements');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%s \t %s','% Element','Group_num');
+    fprintf(fileID,'\n\n');
+    fprintf(fileID,'%c','Group = [');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','];');
+    fprintf(fileID,'\n\n\n');
+
+    % Initial holes
+    fprintf(fileID,'%c','%% Group Elements');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','% Elements that are considered holes initially');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%s','% Element');
+    fprintf(fileID,'\n\n');
+    fprintf(fileID,'%c','Initial_holes = [');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','];');
+    fprintf(fileID,'\n\n\n');
+
+    % Boundary elements
+    fprintf(fileID,'%c','%% Boundary Elements');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','% Elements that can not be removed');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%s','% Element');
+    fprintf(fileID,'\n\n');
+    fprintf(fileID,'%c','Boundary_elements = [');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','];');
+    fprintf(fileID,'\n\n\n');
+
+    % Boundary elements
+    fprintf(fileID,'%c','%% Micro Gauss Post');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%s','% Element');
+    fprintf(fileID,'\n\n');
+    fprintf(fileID,'%c','Micro_gauss_post = [');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','];');
+    fprintf(fileID,'\n\n\n');
+
+    % Master-slave nodes
+    fprintf(fileID,'%c','%% Master-Slave');
+    fprintf(fileID,'\n\n');
+    fprintf(fileID,'%c','Master_slave = [');
+    fprintf(fileID,'\n');
+    for k = 1:size(m.masterSlaveNodes,1)
+        fprintf(fileID,'%g %g\r\n',m.masterSlaveNodes(k,1),m.masterSlaveNodes(k,2));
+    end
+    fprintf(fileID,'%c','];');
+    fprintf(fileID,'\n\n');
+
+    % Nodes solid
+    fprintf(fileID,'%c','%% Nodes Solid');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','% Nodes that must remain');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%s','% Nodes');
+    fprintf(fileID,'\n\n');
+    fprintf(fileID,'%c','% nodesolid = 1;');
+    fprintf(fileID,'\n\n\n');
+
+    % External border elements
+    fprintf(fileID,'%c','%% External Border Elements');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','% Detect the elements that define the edge of the domain');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%s \t %s \t %s','% Element','Node(1)','Node(2)');
+    fprintf(fileID,'\n\n');
+    fprintf(fileID,'%c','External_border_elements = [');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','];');
+    fprintf(fileID,'\n\n\n');
+
+    % External border nodes
+    fprintf(fileID,'%c','%% External Border Nodes');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','% Detect the nodes that define the edge of the domain');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%s \t %s \t %s','% Node');
+    fprintf(fileID,'\n\n');
+    fprintf(fileID,'%c','External_border_nodes = [');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','];');
+    fprintf(fileID,'\n\n\n');
+
+    % Materials
+    fprintf(fileID,'%c','%% Materials');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','% Materials that have been used');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%s \t %s \t %s \t %s','% Material_Num','Mat_density','Young_Modulus','Poisson');
+    fprintf(fileID,'\n\n');
+    fprintf(fileID,'%c','Materials = [');
+    fprintf(fileID,'\n');
+    fprintf(fileID,'%c','];');
+end
+
+
 
