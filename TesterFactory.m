@@ -6,7 +6,8 @@ classdef TesterFactory < handle
                     obj = MasterSlaveNodesTester(initialData);
                 case 'SquaredMeshCreatorTester'
                     obj = SquaredMeshCreatorTester(initialData);
-                % Proximas clases a testear (poner el case)
+                case 'NodesCalculatorTester'
+                    obj = NodesCalculatorTester(initialData);
             end
         end
     end

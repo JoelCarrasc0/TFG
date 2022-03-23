@@ -17,9 +17,9 @@ end
 function  [dim,divUnit,c,theta] = obtainInitialData()
 % Datos de entrada del programa. COMPLETAMENTE GENERAL
     dim = 2;
-    divUnit = 5; %Divisions/length of the side
-    c = [2,1,2];
-    theta = [0,60,90];
+    divUnit = 3; %Divisions/length of the side
+    c = [1,1];
+    theta = [0,90];
 end
 
 function nsides = obtainPolygonSides(c,theta)
