@@ -22,17 +22,8 @@ classdef MeshCreator < handle
             obj.obtainDimensions();
             obj.computeNodeCoordinates();
             obj.connectNodes();
-%             obj.obtainMasterSlaveNodes();
-%             obj.plotCoordinates();
+            obj.obtainMasterSlaveNodes();
         end
-        
-%         function plotLabelsOfNodes(obj)
-%             
-%         end
-%         
-%         function createPreprocessArchive(obj)
-%             obj.writeFEMreadingArchive();
-%         end
         
     end
     
@@ -58,7 +49,7 @@ classdef MeshCreator < handle
             s.theta = obj.theta;
             s.div = obj.div;
             s.nodes = obj.nodes;
-            a = NodeCoordinatesComputer(s);
+            a = CoordinatesComputer(s);
             a.computeCoordinates();
             obj.coord = a.totalCoord;
         end
@@ -67,17 +58,10 @@ classdef MeshCreator < handle
             obj.connec = delaunay(obj.coord);
         end
         
-%         function obtainMasterSlaveNodes(obj)
-%             
-%         end
-%         
-%         function plotCoordinates(coord,connec)
-%             s.coord = coord;
-%             s.connec = connec;
-%             m = Mesh(s);
-%             m.plot();
-%         end
-%         
+        function obtainMasterSlaveNodes(obj)
+            
+        end
+        
     end
 
 end

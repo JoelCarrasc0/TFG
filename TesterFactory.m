@@ -8,6 +8,8 @@ classdef TesterFactory < handle
                     obj = SquaredMeshCreatorTester(initialData);
                 case 'NodesCalculatorTester'
                     obj = NodesCalculatorTester(initialData);
+                case 'VertexCoordinatesCalculatorTester'
+                    obj = VertexCoordinatesCalculatorTester(initialData);
             end
         end
     end
