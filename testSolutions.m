@@ -7,6 +7,7 @@ function testSolutions
     nV = load('nvert.mat');
     bN = load('boundNodes.mat');
     tN = load('totalNodes.mat');
+    vC = load('vertCoord.mat');
     initialData.c = sideLength;
     initialData.theta = theta;
     initialData.div = unitDiv*sideLength;
@@ -14,10 +15,11 @@ function testSolutions
     initialData.nodes.vert = nV.nsides;
     initialData.nodes.bound = bN.boundNodes;
     initialData.nodes.total = tN.totalNodes;
+    initialData.vertCoord = vC.vertCoord;
     
     %TESTERS
-    %'SquaredMeshCreatorTester', 'MasterSlaveNodesTester'
-    testers = {'NodesCalculatorTester','VertexCoordinatesCalculatorTester'};
+    %
+    testers = {'NodesCalculatorTester','VertexCoordinatesCalculatorTester','BoundaryCoordinatesCalculatorTester'};
     
     for iTest = 1:length(testers)
         Tester.create(testers{iTest},initialData);

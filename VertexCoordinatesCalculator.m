@@ -1,15 +1,12 @@
 classdef VertexCoordinatesCalculator < handle
     
     properties (Access = private)
-%         c
-%         theta
-%         nodes
-    end
-    
-    properties (Access = public)
         c
         theta
         nodes
+    end
+    
+    properties (Access = public)
         vertCoord
     end
     
@@ -27,7 +24,7 @@ classdef VertexCoordinatesCalculator < handle
         
     end
     
-    methods (Access = public)
+    methods (Access = private)
         
         function init(obj,cParams)
             obj.c = cParams.c;
@@ -39,15 +36,20 @@ classdef VertexCoordinatesCalculator < handle
         function obtainMasterVertex(obj)
             c0 = [0,0];
             for iMaster = 1:obj.nodes.vert/2
-                pos = computeThePosition(c0,obj.c(iMaster),obj.theta(iMaster));
+                leng = obj.c(iMaster);
+                angle = obj.theta(iMaster);
+                pos = NodeCoordinatesComputer.computeThePosition(c0,leng,angle);
                 obj.vertCoord(iMaster+1,:) = obj.vertCoord(iMaster+1,:)+pos;
                 c0 = pos;
             end
         end
         
         function obtainSlaveVertex(obj)
+            c0 = obj.vertCoord(obj.nodes.vert/2+1,:);
             for iSlave = 1:obj.nodes.vert/2
-                pos = computeThePosition(c0,obj.c(iSlave),obj.theta(iSlave)+180);
+                leng = obj.c(iSlave);
+                angle = obj.theta(iSlave)+180;
+                pos = NodeCoordinatesComputer.computeThePosition(c0,leng,angle);
                 if iSlave == obj.nodes.vert/2
                     if obj.vertCoord(1,:) ~= pos
                         cprintf('red','CRYTICAL ERROR. Vertices computed wrongly \n');
@@ -61,14 +63,5 @@ classdef VertexCoordinatesCalculator < handle
         end
         
     end
-    
-    methods (Static)
-        
-        function pos = computeThePosition(c0,c,theta)
-            pos = c0+c.*[cosd(theta) sind(theta)];
-        end
-        
-    end
-    
+
 end
-% COMPUTE POSITION FALLA. DEBE SER POR EL ACCESO A LA FUNCIÓN

@@ -60,8 +60,16 @@ classdef NodeCoordinatesComputer < handle
             s.nodes = onj.nodes;
             s.div = obj.div;
             s.boundCoord = obj.boundCoord;
-            a = TotalCoordinatesCalculator(s);
+            a = TotalCoordinatesCalculator.create(s);
             obj.totalCoord = a.totalCoord;
+        end
+        
+    end
+    
+    methods (Static)
+        
+        function pos = computeThePosition(c0,c,theta)
+            pos = c0+c.*[cosd(theta) sind(theta)];
         end
         
     end
