@@ -11,13 +11,13 @@ function SquaredMeshCreator()
     vertIndex(:,1) = 1:nsides;
     plotVertices(vertIndex,coord);
     plotMasterSlaveNodes(masterSlaveIndex,coord);
-    %writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength);
+    writeFEMreadingfunction(coord,connec,masterSlaveIndex,'SquaredMesh25x25.m', vertCoord);
 end
 
 function  [dim,divUnit,c,theta] = obtainInitialData()
 % Datos de entrada del programa. COMPLETAMENTE GENERAL
     dim = 2;
-    divUnit = 3; %Divisions/length of the side
+    divUnit = 25; %Divisions/length of the side
     c = [1,1];
     theta = [0,90];
 end
@@ -237,7 +237,10 @@ function plotNodes(ind,coord,colorValue)
     set(t,'Color',colorValue)
 end
 
-function writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength)
+function writeFEMreadingfunction(coord,connec,masterSlaveNodes,meshfilename,vertCoord)
+    Data_prb = {'''TRIANGLE''','''SI''','''2D''','''Plane_Stress''','''ELASTIC''','''MICRO'''};
+    
+    % Initialization of the document
     fileID = fopen(meshfilename,'w');
     fprintf(fileID,'%c','%% Data file');
     fprintf(fileID,'\n\n');
@@ -254,8 +257,8 @@ function writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength)
     % Coordinates
     fprintf(fileID,'%c','coord = [');
     fprintf(fileID,'\n');
-    for k = 1:size(m.coord,1)
-        fprintf(fileID,'%g %g %g %g\r\n',k,m.coord(k,1),m.coord(k,2),0);
+    for k = 1:size(coord,1)
+        fprintf(fileID,'%g %g %g %g\r\n',k,coord(k,1),coord(k,2),0);
     end
     fprintf(fileID,'%c','];');
     fprintf(fileID,'\n\n');
@@ -269,8 +272,8 @@ function writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength)
     % Connectivities
     fprintf(fileID,'%c','connec = [');
     fprintf(fileID,'\n');
-    for k = 1:size(m.connec,1)
-        fprintf(fileID,'%g %g %g %g\r\n',k,m.connec(k,1),m.connec(k,2),m.connec(k,3));
+    for k = 1:size(connec,1)
+        fprintf(fileID,'%g %g %g %g\r\n',k,connec(k,1),connec(k,2),connec(k,3));
     end
     fprintf(fileID,'%c','];');
     fprintf(fileID,'\n\n');
@@ -282,11 +285,9 @@ function writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength)
     fprintf(fileID,'\n\n');
     fprintf(fileID,'%c','dirichlet_data = [');
     fprintf(fileID,'\n');
-    for k = 1:size(m.coord,1)
-        if ((m.coord(k,1) == 0) && (m.coord(k,2) == 0))||((m.coord(k,1) == 0) && (m.coord(k,2) == Ylength))||((m.coord(k,1) == Xlength) && (m.coord(k,2) == 0))||((m.coord(k,1) == Xlength) && (m.coord(k,2) == Ylength))
-            fprintf(fileID,'%g %g %g\r\n',k,1,0);
-            fprintf(fileID,'%g %g %g\r\n',k,2,0);
-        end
+    for k = 1:size(vertCoord,1)
+        fprintf(fileID,'%g %g %g\r\n',k,1,0);
+        fprintf(fileID,'%g %g %g\r\n',k,2,0);
     end
     fprintf(fileID,'%c','];');
     fprintf(fileID,'\n\n\n');
@@ -360,8 +361,8 @@ function writeFEMreadingfunction(m, meshfilename, Data_prb, Xlength, Ylength)
     fprintf(fileID,'\n\n');
     fprintf(fileID,'%c','Master_slave = [');
     fprintf(fileID,'\n');
-    for k = 1:size(m.masterSlaveNodes,1)
-        fprintf(fileID,'%g %g\r\n',m.masterSlaveNodes(k,1),m.masterSlaveNodes(k,2));
+    for k = 1:size(masterSlaveNodes,1)
+        fprintf(fileID,'%g %g\r\n',masterSlaveNodes(k,1),masterSlaveNodes(k,2));
     end
     fprintf(fileID,'%c','];');
     fprintf(fileID,'\n\n');

@@ -10,6 +10,7 @@ classdef MeshCreator < handle
     properties (Access = public)
         coord
         connec
+        masterSlaveIndex
     end
     
     methods (Access = public)
@@ -23,16 +24,18 @@ classdef MeshCreator < handle
             obj.computeNodeCoordinates();
             obj.connectNodes();
 %             obj.obtainMasterSlaveNodes();
-%             obj.plotCoordinates();
+%             obj.writeFEMreadingArchive();       
         end
         
-%         function plotLabelsOfNodes(obj)
-%             
-%         end
-%         
-%         function createPreprocessArchive(obj)
-%             obj.writeFEMreadingArchive();
-%         end
+        function drawMesh(obj)
+           obj.plotCoordinates(); 
+        end
+        
+        function plotLabelsOfNodes(obj)
+            obj.plotVertices();
+            obj.plotMasterSlaveNodes();
+        end
+
         
     end
     
@@ -70,14 +73,44 @@ classdef MeshCreator < handle
 %         function obtainMasterSlaveNodes(obj)
 %             
 %         end
-%         
-%         function plotCoordinates(coord,connec)
-%             s.coord = coord;
-%             s.connec = connec;
-%             m = Mesh(s);
-%             m.plot();
+
+%         function writeFEMreadingArchive(obj)
+%             
 %         end
-%         
+     
+        function plotCoordinates(obj)
+            s.coord = obj.coord;
+            s.connec = obj.connec;
+            a = Mesh(s);
+            a.plot();
+        end
+        
+        function plotVertices(obj)
+            vertexIndex(:,1) = 1:obj.nodes.vert;
+            plotNodes(vertexIndex,obj.coord,'blue')
+        end
+        
+        function plotMasterSlaveNodes(obj)
+            masterIndex = obj.masterSlaveIndex(:,1);
+            slaveIndex  = obj.masterSlaveIndex(:,2);
+            plotNodes(masterIndex,obj.coord,'green')
+            plotNodes(slaveIndex,obj.coord,'red')
+        end
+        
+    end
+    
+    methods (Static)
+        
+        function plotNodes(ind,coord,colorValue)
+            b = num2str(ind);
+            c = cellstr(b);
+            dx = 0.01; dy = 0.01;
+            x = coord(ind,1)';
+            y = coord(ind,2)';
+            t = text(x+dx,y+dy,c);
+            set(t,'Color',colorValue)
+        end
+        
     end
 
 end

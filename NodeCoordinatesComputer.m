@@ -59,6 +59,7 @@ classdef NodeCoordinatesComputer < handle
             s.theta = obj.theta;
             s.nodes = onj.nodes;
             s.div = obj.div;
+            s.vertCoord = obj.vertCoord;
             s.boundCoord = obj.boundCoord;
             a = TotalCoordinatesCalculator.create(s);
             obj.totalCoord = a.totalCoord;
