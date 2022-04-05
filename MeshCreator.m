@@ -8,6 +8,7 @@ classdef MeshCreator < handle
     end
     
     properties (Access = public)
+        filename
         coord
         connec
         masterSlaveIndex
@@ -16,6 +17,7 @@ classdef MeshCreator < handle
     methods (Access = public)
         
         function obj = MeshCreator(cParams)
+            obj.filename = 'SquaredMeshTest';
             obj.init(cParams);
         end
         
@@ -23,15 +25,15 @@ classdef MeshCreator < handle
             obj.obtainDimensions();
             obj.computeNodeCoordinates();
             obj.connectNodes();
-%             obj.obtainMasterSlaveNodes();
-%             obj.writeFEMreadingArchive();       
+            obj.obtainMasterSlaveNodes();
+            obj.writeFEMreadingArchive();       
         end
         
         function drawMesh(obj)
            obj.plotCoordinates(); 
         end
         
-        function plotLabelsOfNodes(obj)
+        function plotIndicesOfNodes(obj)
             obj.plotVertices();
             obj.plotMasterSlaveNodes();
         end
@@ -70,13 +72,24 @@ classdef MeshCreator < handle
             obj.connec = delaunay(obj.coord);
         end
         
-%         function obtainMasterSlaveNodes(obj)
-%             
-%         end
+        function obtainMasterSlaveNodes(obj)
+            s.coord = obj.coord;
+            s.nodes = obj.nodes;
+            s.div = obj.div;
+            a = MasterSlaveComputer(s);
+            a.computeMasterSlaveNodes();
+            obj.masterSlaveIndex = a.masterSlaveIndex;
+        end
 
-%         function writeFEMreadingArchive(obj)
-%             
-%         end
+        function writeFEMreadingArchive(obj)
+            s.filename = obj.filename;
+            s.coord = obj.coord;
+            s.connec = obj.connec;
+            s.nodes = obj.nodes;
+            s.masterSlaveIndex = obj.masterSlaveIndex;
+            a = MatlabFileWriter(s);
+            a.write();
+        end
      
         function plotCoordinates(obj)
             s.coord = obj.coord;

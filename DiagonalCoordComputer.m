@@ -98,9 +98,5 @@ classdef DiagonalCoordComputer < TotalCoordinatesCalculator
         end
         
     end
-        
-    
-    
-    
-    
+     
 end

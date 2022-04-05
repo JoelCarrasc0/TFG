@@ -8,6 +8,8 @@ function testSolutions
     bN = load('boundNodes.mat');
     tN = load('totalNodes.mat');
     vC = load('vertCoord.mat');
+    b = load('boundary.mat');
+    c = load('coord.mat');
     initialData.c = sideLength;
     initialData.theta = theta;
     initialData.div = unitDiv*sideLength;
@@ -16,10 +18,14 @@ function testSolutions
     initialData.nodes.bound = bN.boundNodes;
     initialData.nodes.total = tN.totalNodes;
     initialData.vertCoord = vC.vertCoord;
+    initialData.boundCoord = b.boundary;
+    initialData.coord = c.coord;
     
     %TESTERS
-    %
-    testers = {'NodesCalculatorTester','VertexCoordinatesCalculatorTester','BoundaryCoordinatesCalculatorTester'};
+   
+    testers = { 'NodesCalculatorTester','VertexCoordinatesCalculatorTester',...
+    'BoundaryCoordinatesCalculatorTester','IntersectionCoordComputerTester',...
+    'MasterSlaveComputerTester'};
     
     for iTest = 1:length(testers)
         Tester.create(testers{iTest},initialData);

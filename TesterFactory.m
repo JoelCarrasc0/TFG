@@ -8,6 +8,10 @@ classdef TesterFactory < handle
                     obj = VertexCoordinatesCalculatorTester(initialData);
                 case 'BoundaryCoordinatesCalculatorTester'
                     obj = BoundaryCoordinatesCalculatorTester(initialData);
+                case 'IntersectionCoordComputerTester'
+                    obj = IntersectionCoordComputerTester(initialData);
+                case 'MasterSlaveComputerTester'
+                    obj = MasterSlaveComputerTester(initialData);
             end
         end
     end

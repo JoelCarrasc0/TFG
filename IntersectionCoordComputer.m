@@ -32,8 +32,8 @@ classdef IntersectionCoordComputer < TotalCoordinatesCalculator
             A = obj.vertCoord(1,:);
             B = obj.vertCoord(2,:);
             C = obj.vertCoord(3,:);
-            obj.vA = computeNormalizedVector(A,B);
-            obj.vB = computeNormalizedVector(B,C);
+            obj.vA = IntersectionCoordComputer.computeUnitaryVector(A,B);
+            obj.vB = IntersectionCoordComputer.computeUnitaryVector(B,C);
         end
         
         function computeIntersections(obj)
@@ -45,11 +45,11 @@ classdef IntersectionCoordComputer < TotalCoordinatesCalculator
                 for iNodes = 1:nodesX
                     pA = obj.boundCoord(obj.nodes.vert+iNodes,:);
                     if obj.vA(1) == 0
-                        [x,y] = computeVerticalIntersection(pA,pB,obj.vB);
+                        [x,y] = IntersectionCoordComputer.computeVerticalIntersection(pA,pB,obj.vB);
                     elseif obj.vB(1) == 0
-                        [x,y] = computeVerticalIntersection(pB,pA,obj.vA);
+                        [x,y] = IntersectionCoordComputer.computeVerticalIntersection(pB,pA,obj.vA);
                     else
-                        [x,y] = computeGeneralIntersection(pA,pB,obj.vA,obj.vB);
+                        [x,y] = IntersectionCoordComputer.computeGeneralIntersection(pA,pB,obj.vA,obj.vB);
                     end
                     obj.totalCoord(intNode,:) = obj.totalCoord(intNode,:)+[x y];
                     intNode = intNode+1;
@@ -61,7 +61,7 @@ classdef IntersectionCoordComputer < TotalCoordinatesCalculator
     
     methods (Static)
         
-        function v_norm = computeNormalizedVector(A,B)
+        function v_norm = computeUnitaryVector(A,B)
             v = B-A;
             m = norm(v);
             v_norm = v/m;

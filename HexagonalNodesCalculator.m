@@ -1,11 +1,8 @@
 classdef HexagonalNodesCalculator < NodesCalculator
 
-    properties (Access = protected)
+    properties (Access = public)
         nvert
         div
-    end
-    
-    properties (Access = public)
         boundNodes
         totalNodes
     end
