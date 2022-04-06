@@ -21,7 +21,7 @@ classdef TesterFactory < handle
                 case 'MasterSlaveComputerTester'
                     obj = MasterSlaveComputerTester(initialData);
                 case 'MeshCreatorTester'
-%                     obj = MeshCreatorTester(initialData);
+                    obj = MeshCreatorTester(initialData);
             end
         end
     end

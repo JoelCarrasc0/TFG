@@ -44,13 +44,13 @@ classdef MeshCreator < handle
     methods (Access = private)
         
         function init(obj,cParams)
-            obj.c = cParams.sideLength;
+            obj.c = cParams.c;
             obj.theta = cParams.theta;
             obj.div = cParams.divUnit*obj.c;
         end
         
         function obtainDimensions(obj)
-            s.nvert = 2*lenght(obj.c);
+            s.nvert = 2*length(obj.c);
             s.div = obj.div;
             a = NodesCalculator.create(s);
             obj.nodes.vert = a.nvert;
