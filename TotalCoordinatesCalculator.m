@@ -10,7 +10,7 @@ classdef TotalCoordinatesCalculator < handle
         totalCoord
     end
     
-    methods (Access = public)
+    methods (Access = public, Static)
         
         function obj = create(cParams)
             obj = TotalCoordinatesCalculatorFactory.create(cParams);

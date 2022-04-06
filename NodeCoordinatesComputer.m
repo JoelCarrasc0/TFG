@@ -39,7 +39,7 @@ classdef NodeCoordinatesComputer < handle
         function computeVertCoord(obj)
             s.c = obj.c;
             s.theta = obj.theta;
-            s.nodes = onj.nodes;
+            s.nodes = obj.nodes;
             a = VertexCoordinatesCalculator(s);
             obj.vertCoord = a.vertCoord;
         end
@@ -47,7 +47,7 @@ classdef NodeCoordinatesComputer < handle
         function computeBoundCoord(obj)
             s.c = obj.c;
             s.theta = obj.theta;
-            s.nodes = onj.nodes;
+            s.nodes = obj.nodes;
             s.div = obj.div;
             s.vertCoord = obj.vertCoord;
             a = BoundaryCoordinatesCalculator(s);
@@ -57,7 +57,7 @@ classdef NodeCoordinatesComputer < handle
         function computeTotalCoord(obj)
             s.c = obj.c;
             s.theta = obj.theta;
-            s.nodes = onj.nodes;
+            s.nodes = obj.nodes;
             s.div = obj.div;
             s.vertCoord = obj.vertCoord;
             s.boundCoord = obj.boundCoord;

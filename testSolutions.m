@@ -22,10 +22,10 @@ function testSolutions
     initialData.coord = c.coord;
     
     %TESTERS
-   
-    testers = { 'NodesCalculatorTester','VertexCoordinatesCalculatorTester',...
-    'BoundaryCoordinatesCalculatorTester','IntersectionCoordComputerTester',...
-    'MasterSlaveComputerTester'};
+   testers = {'NodeCoordinatesComputerTester'};
+%     testers = { 'NodesCalculatorTester','VertexCoordinatesCalculatorTester',...
+%     'BoundaryCoordinatesCalculatorTester','IntersectionCoordComputerTester',...
+%     'MasterSlaveComputerTester','QuadrilateralNodesCalculatorTester'};
     
     for iTest = 1:length(testers)
         Tester.create(testers{iTest},initialData);

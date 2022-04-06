@@ -17,7 +17,7 @@ classdef MeshCreator < handle
     methods (Access = public)
         
         function obj = MeshCreator(cParams)
-            obj.filename = 'SquaredMeshTest';
+            obj.filename = 'CreatedMesh';
             obj.init(cParams);
         end
         
@@ -100,14 +100,14 @@ classdef MeshCreator < handle
         
         function plotVertices(obj)
             vertexIndex(:,1) = 1:obj.nodes.vert;
-            plotNodes(vertexIndex,obj.coord,'blue')
+            MeshCreator.plotNodes(vertexIndex,obj.coord,'blue')
         end
         
         function plotMasterSlaveNodes(obj)
             masterIndex = obj.masterSlaveIndex(:,1);
             slaveIndex  = obj.masterSlaveIndex(:,2);
-            plotNodes(masterIndex,obj.coord,'green')
-            plotNodes(slaveIndex,obj.coord,'red')
+            MeshCreator.plotNodes(masterIndex,obj.coord,'green')
+            MeshCreator.plotNodes(slaveIndex,obj.coord,'red')
         end
         
     end
